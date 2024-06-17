@@ -94,4 +94,6 @@
     - +.media.dssott.com
     - +.pvp.net
     - +.oray.com
+    - +.orayimg.com
+    - +.oray.net
     - +.todesk.com
