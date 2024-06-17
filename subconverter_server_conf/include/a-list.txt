@@ -93,3 +93,5 @@
     - "*.mcdn.bilivideo.cn"
     - +.media.dssott.com
     - +.pvp.net
+    - +.oray.com
+    - +.todesk.com
