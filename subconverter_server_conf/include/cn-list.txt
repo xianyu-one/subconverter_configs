@@ -21867,6 +21867,7 @@
     - +.ecuc123.net
     - +.ecukwai.com
     - +.ecustmde.com
+    - +.ecloudtech.com
     - +.ecv360.com
     - +.ecvv.com
     - +.ecwan77.net
