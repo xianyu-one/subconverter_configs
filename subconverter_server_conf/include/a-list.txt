@@ -97,3 +97,5 @@
     - +.orayimg.com
     - +.oray.net
     - +.todesk.com
+    - v4.plex.tv
+    - plex.direct
