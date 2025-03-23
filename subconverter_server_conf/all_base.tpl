@@ -7,6 +7,27 @@ allow-lan: {{ default(global.clash.allow_lan, "true") }}
 mode: Rule
 log-level: {{ default(global.clash.log_level, "info") }}
 external-controller: :9090
+
+{% if default(request.clash.tun-set, "0") == "1" %}
+tun:
+  auto-detect-interface: true
+  auto-route: true
+  device: fuckGFW
+  dns-hijack:
+  - any:53
+  mtu: 1500
+  stack: gvisor
+  strict-route: false
+  enable: true
+  inet4_route_address:
+    - 0.0.0.0/1
+    - 128.0.0.0/1
+  inet6_route_address:
+    - '::/1'
+    - '8000::/1'
+{% else %}
+{% endif %}
+
 {% if request.target == "clash" or request.target == "clashr" %}
 dns:
   enable: true
