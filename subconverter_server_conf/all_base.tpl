@@ -31,7 +31,7 @@ tun:
 {% if request.target == "clash" or request.target == "clashr" %}
 dns:
   enable: true
-  direct-nameserver-follow-policy: true
+  direct-nameserver-follow-policy: false
   listen: :53
   prefer-h3: false
   respect-rules: false
