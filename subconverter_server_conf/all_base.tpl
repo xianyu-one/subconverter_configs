@@ -31,11 +31,17 @@ tun:
 {% if request.target == "clash" or request.target == "clashr" %}
 dns:
   enable: true
-  listen: 127.0.0.1:8853
+  direct-nameserver-follow-policy: true
+  listen: :53
+  prefer-h3: false
+  respect-rules: false
+  use-hosts: true
+  use-system-hosts: true
   default-nameserver:
-    - 223.5.5.5
+    - system
+    - 223.6.6.6
     - 8.8.4.4
-  ipv6: false
+  ipv6: true
   enhanced-mode: fake-ip
   nameserver:
     - 119.29.29.29
@@ -48,8 +54,11 @@ dns:
     - https://1.0.0.1/dns-query
     - https://public.dns.iij.jp/dns-query
     - tls://8.8.4.4:853
+  fake-ip-filter-mode: blacklist
+  fake-ip-range: 198.18.0.1/16
   fallback-filter:
-    geoip: false
+    geoip: true
+    geoip-code: CN
     ipcidr:
       - 240.0.0.0/4
       - 0.0.0.0/32
