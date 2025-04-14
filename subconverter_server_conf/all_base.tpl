@@ -57,7 +57,7 @@ dns:
   fake-ip-filter-mode: blacklist
   fake-ip-range: 198.18.0.1/16
   fallback-filter:
-    geoip: true
+    geoip: false
     geoip-code: CN
     ipcidr:
       - 240.0.0.0/4
