@@ -8,6 +8,8 @@ mode: Rule
 log-level: {{ default(global.clash.log_level, "info") }}
 external-controller: :9090
 
+
+{% if request.geoxset == "1" %}
 geodata-mode: true          # GeoIP 使用 .dat；false 时使用 .mmdb
 geo-auto-update: true
 geo-update-interval: 24     # 单位：小时
@@ -17,6 +19,8 @@ geox-url:
   geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
   mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
   asn: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb"
+{% endif %}
+
 
 hosts:
   "time.android.com": 203.107.6.88
