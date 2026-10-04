@@ -41,7 +41,7 @@ class ProfileContractTest(unittest.TestCase):
                     dockerfile,
                 )
 
-    def test_chain_profile_preserves_direct_rules_and_proxies_the_rest(self):
+    def test_chain_profile_keeps_its_own_direct_rules_and_proxies_the_rest(self):
         def rules(path):
             return [
                 line.removeprefix("ruleset=").split(",", 1)
@@ -49,14 +49,13 @@ class ProfileContractTest(unittest.TestCase):
                 if line.startswith("ruleset=")
             ]
 
-        base = rules(SUBCONVERTER / "all-online.ini")
         chain = rules(SUBCONVERTER / "lite-online.ini")
-        self.assertEqual(
-            [source for target, source in base if target == "DIRECT"],
-            [source for target, source in chain if target == "DIRECT"],
-        )
+        self.assertEqual(len(chain[:-2]), 17)
+        self.assertEqual(chain[0][1], "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaIp.list")
+        self.assertEqual(chain[-3], ["DIRECT", "[]GEOIP,CN,no-resolve"])
+        self.assertFalse(any("Steam" in source for _, source in chain))
         self.assertTrue(all(target == "DIRECT" for target, _ in chain[:-2]))
-        self.assertEqual(chain[-2], ["🛫 PASSWALL", "https://raw.githubusercontent.com/xianyu-one/subconverter-toolkit/main/rule-list/android-connectivity.list"])
+        self.assertEqual(chain[-2], ["🛫 PASSWALL", "https://raw.githubusercontent.com/xianyu-one/subconverter_configs/main/rule-list/android-connectivity.list"])
         self.assertEqual(chain[-1], ["🛫 PASSWALL", "[]FINAL"])
         profile = (SUBCONVERTER / "lite-online.ini").read_text(encoding="utf-8")
         self.assertIn(

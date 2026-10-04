@@ -1,6 +1,4 @@
-DOMAIN,v4.plex.tv
-DOMAIN,v6.plex.tv
-DOMAIN,plex.direct
-DOMAIN-SUFFIX,v6.plex.tv
+# Plex 本地發現與直連端點；後綴規則同時覆蓋根域名
 DOMAIN-SUFFIX,v4.plex.tv
+DOMAIN-SUFFIX,v6.plex.tv
 DOMAIN-SUFFIX,plex.direct

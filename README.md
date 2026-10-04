@@ -82,24 +82,47 @@ http://localhost:25500/sub?target=clash&url=<URL 编码后的订阅地址>&confi
 
 通用的在线规则版本。它会生成按地区和业务划分的策略组，并引用 ACL4SSR 与本仓库公开的规则列表，适合能够直接访问 GitHub Raw 内容的 Subconverter 实例。
 
+规则优先级为：局域网、自维护直连例外和 UnBan 白名单 → 统一广告拦截 → Steam 精细分流 → AI、YouTube 等专用业务 → 通用业务 → 国内域名 → Netflix IP 补充、下载工具和国内 IP → 最终兜底。白名单可以覆盖广告拦截；`BanAD` 与 `BanProgramAD` 都由 `🛑 全球拦截` 控制。
+
+AI 和 YouTube 规则先于 Google、Microsoft 通用规则，避免 Gemini、YouTube 和 OpenAI 专用端点被宽泛规则抢先匹配。ACL4SSR 已有的业务列表直接引用上游，包括 OpenAI 和 Amazon，不维护裁剪副本；共享认证、支付、监控服务及 AWS 范围遵循上游定义。
+
+已移除重复的 ClaudeAI、YouTubeMusic、CN、ChinaDNS 和 ChinaNet 来源，以及被 ACL4SSR 完全覆盖的本地 UnBan 列表；GoogleFCM、GoogleCN、GoogleCNProxyIP 仍有独立补充覆盖，继续保留。自维护列表只补充个人直连和 Android 连通性需求。规则依据与后续维护边界见[规则集优化说明](subconverter/docs/ruleset-optimization.md)。
+
+Steam 默认面向中国大陆宽带，使用 [SteamCN](https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/SteamCN.list) 和 [SteamRegionCheck](https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/SteamRegionCheck.list)，并从共享的 PC 游戏平台组中拆出以下策略组：
+
+| 策略组 | 默认选择 | 用途 |
+| --- | --- | --- |
+| `🎮 Steam 出口` | `🔰 节点选择` | 商店、社区、通用 Steam 流量，以及优先代理的 `cm.steampowered.com`、`steamusercontent.com` |
+| `🎮 Steam 地区检测` | `DIRECT` | 上游列表中的精确地区检测域名，优先于通用 `steamserver.net` 规则 |
+| `🎮 Steam 下载` | `DIRECT` | SteamCN 剩余条目和 `steampipe.akamaized.net`；支持独立选择代理 |
+
+SteamCN 并非纯下载列表；`steamusercontent.com` 用途也可能混合，本配置按当前策略优先代理，后续可根据实际连接记录细分。未列入 SteamRegionCheck 的 `steamserver.net` 域名仍走 Steam 出口。
+
+手动跨区时，在 `🎮 Steam 出口` 选择一个固定节点，再将 `🎮 Steam 地区检测` 切到 `🎮 Steam 出口`。不要通过延迟最低或地区负载均衡组实现固定出口。下载组保持直连；需要代理下载时单独切换。切换后重新建立 Steam 连接，并确认客户端保留的组选择与预期一致。出口切换不保证账号商店地区随之改变。
+
+共用 Clash/Mihomo 模板仅为选定的下载 CDN 域名增加 AliDNS DoH 策略，并用 `#DIRECT` 显式直连解析器；没有为整个 Steam、社区或地区检测域名强制国内解析，也没有新增 Steam Fake-IP 排除。该 DNS 策略同时影响 `lite-online.ini` 及其他使用共用模板的配置，两种 DNS 模式均生效；下载组切到代理时仍保留国内解析。实际 CDN 结果还取决于 Steam 下载地区、缓存和运营商线路。
+
+验收时查看生成 YAML 和 Mihomo 连接：地区检测应进入对应组，`cache*.steamcontent.com` 和 `steampipe.akamaized.net` 应进入下载组，商店/社区及两个非下载例外应进入 Steam 出口。确认下载组最终出口为 `DIRECT`，观察 CDN 目标和吞吐；手动切换后检查新连接。使用第三方加密 DNS 或插件覆写时，还需确认选定下载域名的解析实际由 Mihomo 接管。
+
+
 使用时，将文件的 Raw URL 作为 Subconverter 的 `config` 参数：
 
 ```text
-https://raw.githubusercontent.com/xianyu-one/subconverter-toolkit/main/subconverter/all-online.ini
+https://raw.githubusercontent.com/xianyu-one/subconverter_configs/main/subconverter/all-online.ini
 ```
 
 示例：
 
 ```text
-https://your-subconverter.example/sub?target=clash&url=<订阅地址>&config=https%3A%2F%2Fraw.githubusercontent.com%2Fxianyu-one%2Fsubconverter-toolkit%2Fmain%2Fsubconverter%2Fall-online.ini
+https://your-subconverter.example/sub?target=clash&url=<订阅地址>&config=https%3A%2F%2Fraw.githubusercontent.com%2Fxianyu-one%2Fsubconverter_configs%2Fmain%2Fsubconverter%2Fall-online.ini
 ```
 
 ### `lite-online.ini`
 
-链式代理专用的在线规则版本。它沿用 `all-online.ini` 的 `DIRECT` 列表；未命中直连规则的流量进入 `🛫 PASSWALL`，再由 `🔰 节点选择` 选择手动、延迟最低、故障切换或 `🔒 私有出口选择`。私有出口节点需由 Prefetch Proxy 通过 `chaintoken` 注入，并以 `dialer-proxy: 🚀 前置节点池` 连接前置节点。使用时将以下 Raw URL 作为 `config` 参数；自建镜像也可使用 `config/lite-online.ini`：
+链式代理专用的在线规则版本。它保留独立的直连列表，不同步 `all-online.ini` 的 Steam 分流和规则重排；未命中直连规则的流量进入 `🛫 PASSWALL`，再由 `🔰 节点选择` 选择手动、延迟最低、故障切换或 `🔒 私有出口选择`。私有出口节点需由 Prefetch Proxy 通过 `chaintoken` 注入，并以 `dialer-proxy: 🚀 前置节点池` 连接前置节点。使用时将以下 Raw URL 作为 `config` 参数；自建镜像也可使用 `config/lite-online.ini`：
 
 ```text
-https://raw.githubusercontent.com/xianyu-one/subconverter-toolkit/main/subconverter/lite-online.ini
+https://raw.githubusercontent.com/xianyu-one/subconverter_configs/main/subconverter/lite-online.ini
 ```
 
 原先指向仓库根目录的两个 Raw URL 在目录迁移后需要改为以上路径；已有固定订阅地址也应同步更新。
@@ -112,7 +135,7 @@ Clash 目标默认保留原有 Fake-IP 配置；在转换 URL 上添加 `clash.r
 https://your-prefetch-proxy.example/sub?target=clash&url=<订阅地址>&config=<new.ini 地址>&chaintoken=<令牌>&clash.redir-host=1
 ```
 
-Redir-Host 返回真实 IP，允许 Android 私人 DNS 和浏览器安全 DNS 继续使用。进入 TUN 的普通 UDP/TCP 53 由内部 DNS 接管；客户端自己的 DoH/DoT/DoQ 是普通网络连接，不会被 `dns-hijack` 解密或替换。模板通过加密 DNS 解析节点域名，普通解析器通过当前 `🔰 节点选择` 策略组连接。为避免引导环路，节点域名的首次解析会以加密 DoH 直达固定解析器。直连流量使用单独的加密 DNS。
+Redir-Host 返回真实 IP，允许 Android 私人 DNS 和浏览器安全 DNS 继续使用。进入 TUN 的普通 UDP/TCP 53 由内部 DNS 接管；客户端自己的 DoH/DoT/DoQ 是普通网络连接，不会被 `dns-hijack` 解密或替换。模板通过加密 DNS 解析节点域名，普通解析器通过当前 `🔰 节点选择` 策略组连接。为避免引导环路，节点域名的首次解析会以加密 DoH 直达固定解析器。国内域名按 `geosite:cn` 使用 AliDNS；选定 Steam 下载域名使用显式直连的 AliDNS DoH，其他直连域名仍按现有 DNS 策略解析。
 
 `all-online.ini` 在原分流规则之前，加入了常见加密 DNS 解析器地址及 DoT/DoQ、STUN/TURN 常用端口的优先代理规则。它们跟随 `🔰 节点选择`，因此该组应选中预期的链式出口，不要选中 `DIRECT`。这份示例列表无法识别所有使用 HTTPS/443 的自定义 DoH 或所有 WebRTC 服务；请把实际使用的解析器域名和 IP 补进配置。Sniffer 用 HTTP/TLS/QUIC 中可见的域名辅助匹配规则，保留连接的原始目标 IP；关闭 Sniffer 后，普通 DNS、IP 连接与 `dialer-proxy` 建链仍可工作，部分只有 IP 的连接会失去域名规则匹配。
 
@@ -147,7 +170,7 @@ IPv6 应在每个平台验证确实经代理出口；节点或客户端无法可
 在转换配置中引用规则文件：
 
 ```ini
-ruleset=DIRECT,https://raw.githubusercontent.com/xianyu-one/subconverter-toolkit/main/rule-list/remote.list
+ruleset=DIRECT,https://raw.githubusercontent.com/xianyu-one/subconverter_configs/main/rule-list/remote.list
 ```
 
 新增规则时应保持一行一条规则，例如：

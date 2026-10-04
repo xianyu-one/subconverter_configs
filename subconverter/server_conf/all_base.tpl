@@ -73,6 +73,40 @@ dns:
     - https://223.6.6.6/dns-query
 
   nameserver-policy:
+    # Steam 下載 CDN 固定使用大陸直連 DoH；切換下載代理不會切換 DNS。
+    "+.steamcontent.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "dl.steam.clngaa.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "dl.steam.ksyna.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "st.dl.bscstorage.net":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "st.dl.eccdnx.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "st.dl.pinyuncloud.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "steampipe.steamcontent.tnkjmec.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "steampowered.com.8686c.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "steamstatic.com.8686c.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "xz.pphimalayanrt.com":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
+    "steampipe.akamaized.net":
+      - "https://223.5.5.5/dns-query#DIRECT"
+      - "https://223.6.6.6/dns-query#DIRECT"
     "geosite:cn":
       - https://223.5.5.5/dns-query
       - https://223.6.6.6/dns-query
