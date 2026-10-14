@@ -131,6 +131,8 @@ https://raw.githubusercontent.com/xianyu-one/subconverter_configs/main/subconver
 
 Clash 目标默认保留原有 Fake-IP 配置；在转换 URL 上添加 `clash.redir-host=1`，即可生成 Redir-Host + TUN + Sniffer 配置。该参数会直接启用 TUN，无须再加 `clash.tun-set=1`。原有 `clash.tun-set=1` 仍可单独启用 Fake-IP + TUN。
 
+`all_base.tpl` 的 TUN 协议栈默认是 `system`。如需切换，在转换 URL 上添加 `clash.tun-stack=gvisor`、`clash.tun-stack=mixed` 或 `clash.tun-stack=mips`；未传或传入其他值时使用 `system`。使用 `mips` 时请确认客户端采用支持该协议栈的 Mihomo 内核。
+
 ```text
 https://your-prefetch-proxy.example/sub?target=clash&url=<订阅地址>&config=<new.ini 地址>&chaintoken=<令牌>&clash.redir-host=1
 ```

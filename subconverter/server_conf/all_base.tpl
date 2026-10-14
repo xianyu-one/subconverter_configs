@@ -34,7 +34,11 @@ tun:
   dns-hijack:
   - any:53
   mtu: 1500
-  stack: gvisor
+{% if request.clash.tun-stack == "gvisor" or request.clash.tun-stack == "mixed" or request.clash.tun-stack == "mips" %}
+  stack: {{ request.clash.tun-stack }}
+{% else %}
+  stack: system
+{% endif %}
   strict-route: false
   enable: true
   inet4_route_address:
